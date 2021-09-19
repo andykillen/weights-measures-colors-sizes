@@ -1,0 +1,10 @@
+{
+    "name": "rnw/services-map",
+    "version": "1.0.0",
+    "description": "Creates a autoloader for use with Weight, Measures, Colors and Sizes",
+    "autoload": {
+        "psr-4": {
+            "WMCS\\": "src/"
+        }
+    }
+}
