@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width,initial-scale=1'>
+
+	<title>Svelte app</title>
+
+	<style type='text/css'>
+	*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+html {
+	padding: 0;
+	margin: 0;
+	font-size: 100%;
+}
+body {
+	background-color: #f0f0f1;
+	padding: 0;
+	margin: 0;
+}
+
+	</style>
+	<link rel='icon' type='image/png' href='/favicon.png'>
+	<link rel='stylesheet' href='/global.css'>
+	<link rel='stylesheet' href='/build/bundle.css'>
+
+	<script defer src='/build/bundle.js'></script>
+	<script>
+
+		let taxonomyinfoset = [
+			{
+				taxonomy_name : 'shoe_sizes',
+				taxonomy_title : 'Shoe Sizzes',
+				use : true,
+				tabs: [
+					{
+						type: 'general',
+						name: 'General Setup',
+						singular : "Shoe Size",
+						plural : "Shoe Size",
+						separated : true,
+					},
+					{
+						type: 'cols_fields',
+						name: 'Columns and Fields',
+						fields: [
+							{
+								name : 'US Size',
+								column : true, 
+							},
+							{
+								name : 'UK Size',
+								column : true, 
+							}
+
+						]
+					},
+					{
+						type:'filters',
+						name: 'Filters Setup',
+						show_on_all_products: false,
+						show_on : [
+							'shoes', 'trainers', 'sneakers', 'boots'
+						]
+					}
+				]
+				
+
+			},
+			{
+				taxonomy_name : 'colors',
+				taxonomy_title : 'Colors',
+				use : false,
+				tabs: [
+					{
+						type: 'general',
+						name: 'General Setup',
+						singular : "Color",
+						plural : "Colours",
+						separated : true,
+					},
+					{
+						type: 'cols_fields',
+						name: 'Columns and Fields',
+						fields: [
+							{
+								name : 'HEX color',
+								column : true, 
+							},							
+						]
+					},
+					{
+						type:'filters',
+						name: 'Filters Setup',
+						show_on_all_products: true,
+						show_on : [
+							
+						]
+					}
+				]
+				
+
+			}
+		];
+
+		let settings = {
+			test: 'this'
+		};
+	</script>
+</head>
+
+<body>
+	<input type='hidden' id="taxonomy-editor-save" value="" />
+	<div id='taxonomy-editor'></div>
+</body>
+</html>

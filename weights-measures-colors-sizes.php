@@ -28,3 +28,4 @@ require dirname(__FILE__) . "/vendor/autoload.php";
  * Singleton container to hold the project
  */
 new WMCS\Taxonomy\ShoeSize;
+new WMCS\Taxonomy\Colors;

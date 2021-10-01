@@ -4,6 +4,7 @@ namespace WMCS\Base;
 
 use \WMCS\Walkers\EditScreenTaxonomy;
 use \WMCS\Fields\TermMeta;
+use \WP_Term;
 
 abstract class Taxonomy {
     protected $name                 = '';
@@ -26,41 +27,87 @@ abstract class Taxonomy {
     protected $show_tagcloud        = false;
     protected $used_by              = array( 'product' );
     
-    
+    private $settings               = array ( 'name', 'singular', 'plural', 'fields',
+                                              'columns', 'textdomain', 'hierarchical',
+                                              'query_var', 'public', 'publicly_queryable',
+                                              'show_ui', 'show_in_menu', 'show_in_nav_menus',
+                                              'show_in_rest', 'show_tagcloud', 'used_by'
+                                    );
 
-    public function __construct() { 
+    public function __construct( $settings = array() ) {
         
+        /**
+         * Loop the settings array if not empty.
+         * 
+         * Look for named keys and assign the new setting.
+         *
+         */ 
+        if(!empty($settings)) {
+            foreach ($this->settings as $param){
+                if(isset($settings[$param])){
+                    $this->$param = $settings[$param];
+                }
+            }
+        }
+        
+        /**
+         * 2nd chance to override the class variables, params or values.
+         * Setup for hard coding in the sub class without having to remember how to
+         * call the super class with parent::__constuct.
+         */
         $this->adaptions();
 
 
+        /**
+         * load all possible actions for setting up a taxonomy
+         */
+        // register the taxonomy
         add_action( 'init', [ $this, 'register']);
+        // add extra column content where there are new columns
         add_filter( 'manage_' . $this->name .'_custom_column',[ $this , 'extra_column_content' ],10,3);
+        // Show extra columns in the CRUD listing
         add_filter( 'manage_edit-' . $this->name .'_columns', [ $this ,'extra_column_names'] );
+        // Use a different walker than normal that overrides slightly to add more filters. For edit screens only.
         add_filter( 'wp_terms_checklist_args', [ $this ,'adapt_walker'], 10, 2 );
-        add_action( $this->name . '_edit_form_fields', [$this,'edit_field_set'],10,2 );
+        // Add new form fields from the $fields array
+        add_action( $this->name . '_edit_form_fields', [$this,'edit_field_setup'],10,2 );
+        // Save the form fields from the $fields array
         add_action( 'edited_' . $this->name, [$this,'save_term_fields'],10);
 
     }
 
+    /**
+     * Standard lables for a taxonomy
+     * 
+     * Allows for text translations by doing it this way.
+     * 
+     * TODO: check this really works for translations!
+     * 
+     * @return array 
+     */
     public function labels() {
-        return array(
-            'name'                          => __($this->singular, $this->textdomain ),
-            'singular_name'                 => __($this->singular, $this->textdomain),
-            'search_items'                  => __('Search '. $this->plural, $this->textdomain),
-            'popular_items'                 => __('Popular '. $this->plural, $this->textdomain),
-            'all_items'                     => __('All '. $this->plural, $this->textdomain),
-            'edit_item'                     => __('Edit '. $this->singular, $this->textdomain),
-            'edit_item'                     => __('Edit '. $this->singular, $this->textdomain),
-            'update_item'                   => __('Update '. $this->singular, $this->textdomain),
-            'add_new_item'                  => __('Add New '. $this->singular, $this->textdomain),
-            'new_item_name'                 => __('New '.$this->singular.' Name', $this->textdomain),
-            'separate_items_with_commas'    => __('Seperate '.$this->singular.' with Commas', $this->textdomain),
-            'add_or_remove_items'           => __('Add or Remove '. $this->singular, $this->textdomain),
-            'choose_from_most_used'         => __('Choose from Most Used '. $this->singular, $this->textdomain)
+        array(
+            'name'                          => $this->singular, 
+            'singular_name'                 => $this->singular,
+            'search_items'                  => sprintf( __( 'Search %s', $this->textdomain ), $this->plural),
+            'popular_items'                 => sprintf( __( 'Popular %s', $this->textdomain ), $this->plural),
+            'all_items'                     => sprintf( __( 'All %s', $this->textdomain ), $this->plural),
+            'edit_item'                     => sprintf( __('Edit %s', $this->textdomain ), $this->singular),
+            'edit_item'                     => sprintf( __('Edit %s', $this->textdomain ), $this->singular),
+            'update_item'                   => sprintf( __('Upadate %s', $this->textdomain ), $this->singular),
+            'add_new_item'                  => sprintf( __('Add New %s', $this->textdomain ), $this->singular),
+            'new_item_name'                 => sprintf( __('New %s Name', $this->textdomain ), $this->singular),
+            'separate_items_with_commas'    => sprintf( __('Seperate %s with Commas', $this->textdomain ), $this->singular),
+            'add_or_remove_items'           => sprintf( __('Add or Remove %s', $this->textdomain ), $this->singular),
+            'choose_from_most_used'         => sprintf( __('Choose from Most Used %s', $this->textdomain ), $this->singular),
         );
 
+        return apply_filters('wmcs_taxonom_' . $this->name .'_labels', $args);
     }
    
+    /**
+     * 
+     */
     public function options() {
         $args = array(
             'labels'                => $this->labels(),
@@ -87,14 +134,6 @@ abstract class Taxonomy {
         return apply_filters('wmcs_taxonom_' . $this->name .'_post_types', $this->used_by);
     }
 
-    public function add_meta_fields() {
-
-    }
-
-    public function save_meta_fields() {
-        
-    }
-
     public function extra_column_names( $columns ) {
         error_log(print_r($this->columns['add'], true));
         if(!empty($this->columns['add'])){
@@ -112,15 +151,37 @@ abstract class Taxonomy {
         return $columns;
     }
 
+    /**
+     * Add content to the column if it exists
+     * 
+     * @param string $content
+     * @param string $column_name
+     * @param int $term_id
+     * 
+     * @return string $content
+     */
     public function extra_columns_content( $content, $column_name, $term_id ) {
         
-        if(!empty($this->columns['add']) && in_array( $column_name, array_keys( $this->columns['add']) ) ){
+        // Check if there are any columns to add.
+        // If there are, check if the wanted column name exists in the array.
+        if( !empty($this->columns['add']) && 
+            in_array( $column_name, array_keys( $this->columns['add']) ) 
+            ) {
             $content = get_term_meta($term_id, $column_name, true );
         }
         
         return $content;
     }
 
+    /**
+     * Adapt the walker used by the Edit screen to be one with more
+     * filters.
+     * 
+     * @param array $args
+     * @param int $post_id
+     * 
+     * @return array $args 
+     */
     public function adapt_walker($args, $post_id){
         if($args['taxonomy'] != $this->name) {
             return $args;
@@ -131,19 +192,36 @@ abstract class Taxonomy {
         return $args;
     }
 
+    /**
+     * Add a column to the $columns array
+     * 
+     * @param string $key, hyphenated lowercase
+     * @param string $text, free format text
+     */
     protected function add_column($key, $text) {
         $this->columns['add'][$key] = $text; 
     }
 
+    /**
+     * Add a column to the remove array so that it will be removed
+     * from the CRUD listing
+     * 
+     * @param string $key
+     */
     protected function remove_column($key) {
         $this->columns['remove'][] = $key;
     }
 
     protected function adaptions() {
-        // do something
+        // do something in the sub class to adapt.
     }
 
-    public function edit_field_set( $term ) {
+    /**
+     * Add fields to the Term edit screen
+     * 
+     * @param object $term, WP_Term object
+     */
+    public function edit_field_setup( WP_Term $term ) {
 
         if( empty($this->fields) ) return;
         $fields = new TermMeta();
@@ -160,6 +238,12 @@ abstract class Taxonomy {
         }
     }
 
+    /**
+     * Save the fields from the Field array on save of the
+     * taxonomy item
+     * 
+     * @param int $term_id 
+     */
     public function save_term_fields( $term_id ) {
         if( empty($this->fields) ) return;
 
@@ -168,7 +252,6 @@ abstract class Taxonomy {
         foreach( $this->fields as $field) {
            $fields->save_field( $term_id, $field['name'], $field['type'] );
         }
-
     }
 
 }
