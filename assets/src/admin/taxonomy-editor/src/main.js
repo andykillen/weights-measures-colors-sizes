@@ -4,7 +4,8 @@ const app = new App({
 	target: document.getElementById('taxonomy-editor'),
 	props: {
 		infoset : taxonomyinfoset,
-		settings : settings
+		settings : settings,
+		cats : cats
 	}
 });
 

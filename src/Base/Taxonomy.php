@@ -73,6 +73,8 @@ abstract class Taxonomy {
         add_action( $this->name . '_edit_form_fields', [$this,'edit_field_setup'],10,2 );
         // Save the form fields from the $fields array
         add_action( 'edited_' . $this->name, [$this,'save_term_fields'],10);
+        // Save the form fields from the $fields array
+        add_action( 'saved_' . $this->name, [$this,'saved_hook'],10);
 
     }
 
@@ -86,7 +88,7 @@ abstract class Taxonomy {
      * @return array 
      */
     public function labels() {
-        array(
+        $args = array(
             'name'                          => $this->singular, 
             'singular_name'                 => $this->singular,
             'search_items'                  => sprintf( __( 'Search %s', $this->textdomain ), $this->plural),
@@ -252,6 +254,13 @@ abstract class Taxonomy {
         foreach( $this->fields as $field) {
            $fields->save_field( $term_id, $field['name'], $field['type'] );
         }
+    }
+
+    /**
+     * 
+     */
+    public function saved_hook() {
+        // do something on save.
     }
 
 }

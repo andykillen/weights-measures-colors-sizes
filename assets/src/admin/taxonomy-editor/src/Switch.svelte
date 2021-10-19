@@ -4,13 +4,7 @@
     export let values;
     export let value;
 </script>
-<!-- <style lang="scss">
-@import './styles/theme';
 
-label {
-    color:$color;
-}
-</style> -->
 <style>
  .switch-holder {
      position: absolute;
@@ -18,12 +12,10 @@ label {
      top:0;
  }
 
-.switch {
-  margin: 4rem auto;
-}
+
 /* main styles */
 .switch {
-  width: 24rem;
+  width: 22rem;
   position: relative;
 }
 .switch input {
@@ -57,51 +49,51 @@ label {
   transition: 0.25s ease all;
 }
 .switch .toggle-inside {
-  border-radius: 5rem;
+  border-radius: 50%;
   background: #4a4a4a;
   position: absolute;
   transition: 0.25s ease all;
 }
 .switch--horizontal {
-  width: 18rem;
-  height: 3rem;
+ /* width: 15rem; */
+  height: 2rem;
   margin: 0 auto;
   font-size: 0;
   margin-bottom: 1rem;
 }
 .switch--horizontal input {
-  height: 3rem;
-  width: 6rem;
-  left: 6rem;
+  height: 2rem;
+  width: 5rem;
+  /* left: 6rem; */
   margin: 0;
 }
 .switch--horizontal label {
   font-size: 1.5rem;
-  line-height: 3rem;
+  line-height: 1.5rem;
   display: inline-block;
-  width: 6rem;
+  width: 4rem;
   height: 100%;
   margin: 0;
   text-align: center;
 }
-.switch--horizontal label:last-of-type {
+/* .switch--horizontal label:last-of-type {
   margin-left: 6rem;
-}
+} */
 .switch--horizontal .toggle-outside {
   background: #fff;
   position: absolute;
-  width: 6rem;
-  left: 6rem;
+  width: 4.75rem;
+  left: 4.5rem;
 }
 .switch--horizontal .toggle-inside {
-  height: 2.5rem;
-  width: 2.5rem;
+  height: 1.5rem;
+  width: 1.5rem;
 }
 .switch--horizontal input:checked ~ .toggle-outside .toggle-inside {
   left: 0.25rem;
 }
 .switch--horizontal input ~ input:checked ~ .toggle-outside .toggle-inside {
-  left: 3.25rem;
+  left: 3rem;
 }
 .switch--no-label label {
   width: 0;
@@ -120,7 +112,7 @@ label {
   background: #2ecc71;
 }
 .switch--no-label.switch--horizontal {
-  width: 6rem;
+  width: 4.5rem;
 }
 .switch--no-label.switch--horizontal input,
 .switch--no-label.switch--horizontal .toggle-outside {

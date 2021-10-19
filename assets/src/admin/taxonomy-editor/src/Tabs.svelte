@@ -1,6 +1,12 @@
 <script>
+    import settingsInfoset from "./modules/customstore.js";
+    import General from "./Gerneral.svelte";
+    import Filters from "./Filters.svelte";
+    import ColFields from "./ColFields.svelte";
+
     export let taxonomy;
     export let taxonomy_name;
+    
 
     function changeTab(event) {
         event.preventDefault();
@@ -46,6 +52,14 @@
 {#each taxonomy.tabs as tab, i}
 	<div class='area {taxonomy_name}' style={ i > 0 ? "display:none":''} id="{taxonomy_name}-{tab.type}">
 		<h2>{tab.name}</h2>
-		{tab.type}
+        <h3>{tab.type}</h3>
+		{#if tab.type == 'general'}
+            <h4>doign general</h4>
+            <General {taxonomy_name} />
+        {:else if tab.type == 'col_fields'}
+            <ColFields {taxonomy_name} />
+        {:else if tab.type == 'filters'}  
+            <Filters {taxonomy_name} />  
+       {/if}
 	</div>
 {/each}
